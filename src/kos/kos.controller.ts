@@ -10,7 +10,9 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseEnumPipe,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Express } from 'express';
 import { Gender } from '@prisma/client';
@@ -20,7 +22,12 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateKosDto } from './dto/create-kos.dto';
+import { UpdateKosDto } from './dto/update-kos.dto';
 import { multerConfig } from './multer.config';
+
+interface RequestWithUser extends Request {
+  user: { id: number; email: string; role: string };
+}
 
 @Controller('kos')
 export class KosController {
@@ -29,19 +36,14 @@ export class KosController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('OWNER')
-  create(@Body() dto: CreateKosDto) {
-    return this.kosService.create(dto);
-  }
-
-  @Post('upload')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('OWNER')
   @UseInterceptors(FileInterceptor('image', multerConfig))
-  upload(@UploadedFile() file: Express.Multer.File) {
-    return {
-      message: 'Upload berhasil',
-      filename: file.filename,
-    };
+  create(
+    @Body() dto: CreateKosDto,
+    @Req() req: RequestWithUser,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const userId = req.user.id;
+    return this.kosService.create(dto, userId, file);
   }
 
   @Get()
@@ -49,20 +51,21 @@ export class KosController {
     return this.kosService.findAll();
   }
 
-  // ✅ FIXED ENUM FILTER
   @Get('filter/:gender')
-  filter(
-    @Param('gender', new ParseEnumPipe(Gender))
-    gender: Gender,
-  ) {
+  filter(@Param('gender', new ParseEnumPipe(Gender)) gender: Gender) {
     return this.kosService.findByGender(gender);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('OWNER')
-  update(@Param('id') id: string, @Body() dto: CreateKosDto) {
-    return this.kosService.update(Number(id), dto);
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateKosDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.kosService.update(Number(id), dto, file);
   }
 
   @Delete(':id')

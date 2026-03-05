@@ -18,6 +18,12 @@ interface Booking {
   kos?: {
     name?: string;
     price_per_month?: number;
+    images?: {
+      file: string;
+    }[];
+    facilities?: {
+      facility: string;
+    }[];
   };
 }
 
@@ -45,6 +51,21 @@ export class PdfService {
     doc.text(`Email : ${booking.user?.email ?? '-'}`);
     doc.text(`Nama Kos : ${booking.kos?.name ?? '-'}`);
     doc.text(`Harga / bulan : ${booking.kos?.price_per_month ?? '-'}`);
+    const facilities =
+      booking.kos?.facilities?.map((f) => f.facility).join(', ') ?? '-';
+
+    doc.text(`Fasilitas : ${facilities}`);
+
+    const image =
+      booking.kos?.images && booking.kos.images.length > 0
+        ? booking.kos.images[0].file
+        : '-';
+
+    doc.image(`uploads/${image}`, {
+      fit: [250, 200],
+      align: 'center',
+    });
+    doc.moveDown(2); // memberi jarak antar paragraf
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     doc.text(`Tanggal Mulai : ${booking.start_date ?? '-'}`);
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

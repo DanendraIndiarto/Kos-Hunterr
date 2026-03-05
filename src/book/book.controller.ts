@@ -8,11 +8,21 @@ import {
   Query,
   BadRequestException,
   NotFoundException,
+  UseGuards,
+  Req,
+  Patch,
 } from '@nestjs/common';
-import type { Response } from 'express';
+
+import type { Response, Request } from 'express';
 
 import { BookService } from './book.service';
 import { PdfService } from './pdf.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookStatusDto } from './dto/update-book-status.dto';
+
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { RolesGuard } from '../auth/guard/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('book')
 export class BookController {
@@ -21,19 +31,33 @@ export class BookController {
     private readonly pdfService: PdfService,
   ) {}
 
-  // 📌 CREATE BOOKING
   @Post()
-  create(@Body() body: any) {
-    return this.bookService.create(body);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SOCIETY')
+  create(@Req() req: Request, @Body() dto: CreateBookDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const user = (req as any).user;
+
+    return this.bookService.create({
+      ...dto,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      userId: user.id,
+    });
   }
 
-  // 📌 GET ALL BOOKING
   @Get()
   findAll() {
     return this.bookService.findAll();
   }
 
-  // 📆 HISTORY BY MONTH & YEAR
+  @Patch('status/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('OWNER')
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateBookStatusDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return this.bookService.updateStatus(Number(id), dto.status);
+  }
+
   @Get('history')
   history(@Query('month') month: string, @Query('year') year: string) {
     if (!month || !year) {
@@ -43,7 +67,6 @@ export class BookController {
     return this.bookService.findByMonth(Number(month), Number(year));
   }
 
-  // 🧾 GENERATE PDF NOTA
   @Get('nota/:id')
   async generate(@Param('id') id: string, @Res() res: Response) {
     const booking = await this.bookService.findById(Number(id));

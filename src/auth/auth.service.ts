@@ -27,36 +27,48 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // 🔥 REGISTER
-  async register(dto: RegisterDto): Promise<TokenResponseDto> {
-    const existingUser = await this.usersService.findByEmail(dto.email);
+  async register(dto: RegisterDto) {
+    const email = dto.email.toLowerCase().trim();
 
+    const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('Email sudah digunakan');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await bcrypt.hash(dto.password.trim(), 10);
 
     const user = await this.usersService.create({
       ...dto,
+      email,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: hashedPassword,
     });
 
-    return this.generateToken(user as User);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    };
   }
 
-  // 🔐 VALIDATE LOGIN
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(
+      email.toLowerCase().trim(),
+    );
 
     if (!user) {
       throw new UnauthorizedException('User tidak ditemukan');
     }
 
+    if (!user.password) {
+      throw new UnauthorizedException('Password tidak tersedia');
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const isMatch = await bcrypt.compare(password, user.password ?? '');
+    const isMatch = await bcrypt.compare(password.trim(), user.password);
 
     if (!isMatch) {
       throw new UnauthorizedException('Password salah');
@@ -65,13 +77,11 @@ export class AuthService {
     return user as User;
   }
 
-  // 🔐 LOGIN
   async login(email: string, password: string): Promise<TokenResponseDto> {
     const user = await this.validateUser(email, password);
     return this.generateToken(user);
   }
 
-  // 🎟 GENERATE JWT
   private generateToken(user: User): TokenResponseDto {
     return {
       message: 'Berhasil',

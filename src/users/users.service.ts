@@ -1,33 +1,46 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: any) {
-    const hashed = await bcrypt.hash(data.password, 10);
-
     return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashed,
-      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      data,
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
-  }
-
-  findByEmail(email: string) {
+  async findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
+    });
+  }
+
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
+  async findById(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+      },
     });
   }
 }
