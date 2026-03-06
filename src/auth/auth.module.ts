@@ -8,9 +8,11 @@ import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     UsersModule,
-    JwtModule.register({
-      secret: 'SECRET_KEY',
-      signOptions: { expiresIn: '1d' },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
   ],
   controllers: [AuthController],
