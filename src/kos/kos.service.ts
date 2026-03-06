@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Gender } from '@prisma/client';
+import { Gender, Prisma } from '@prisma/client';
 import { CreateKosDto } from './dto/create-kos.dto';
 import { UpdateKosDto } from './dto/update-kos.dto';
 import type { Express } from 'express';
@@ -10,10 +10,6 @@ export class KosService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateKosDto, userId: number, file?: Express.Multer.File) {
-    const facilitiesArray = dto.facilities
-      ? dto.facilities.split(',').map((f) => f.trim())
-      : [];
-
     return this.prisma.kos.create({
       data: {
         name: dto.name,
@@ -24,15 +20,9 @@ export class KosService {
 
         images: file
           ? {
-              create: { file: file.filename },
-            }
-          : undefined,
-
-        facilities: facilitiesArray.length
-          ? {
-              create: facilitiesArray.map((f) => ({
-                facility: f,
-              })),
+              create: {
+                file: file.filename,
+              },
             }
           : undefined,
       },
@@ -55,20 +45,16 @@ export class KosService {
   }
 
   async update(id: number, dto: UpdateKosDto, file?: Express.Multer.File) {
-    const data: any = {};
+    const data: Prisma.KosUpdateInput = {};
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (dto.name) data.name = dto.name;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (dto.address) data.address = dto.address;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (dto.price_per_month) data.price_per_month = dto.price_per_month;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (dto.gender) data.gender = dto.gender;
-    // update kos utama
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.address !== undefined) data.address = dto.address;
+    if (dto.price_per_month !== undefined)
+      data.price_per_month = dto.price_per_month;
+    if (dto.gender !== undefined) data.gender = dto.gender;
+
     await this.prisma.kos.update({
       where: { id },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data,
     });
 
@@ -82,24 +68,6 @@ export class KosService {
           kos_id: id,
           file: file.filename,
         },
-      });
-    }
-
-    if (dto.facilities) {
-      const facilitiesArray =
-        typeof dto.facilities === 'string'
-          ? (dto.facilities as string).split(',').map((f) => f.trim())
-          : dto.facilities;
-
-      await this.prisma.kosFacility.deleteMany({
-        where: { kos_id: id },
-      });
-
-      await this.prisma.kosFacility.createMany({
-        data: facilitiesArray.map((f) => ({
-          kos_id: id,
-          facility: f,
-        })),
       });
     }
 

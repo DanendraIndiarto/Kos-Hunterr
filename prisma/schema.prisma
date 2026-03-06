@@ -62,7 +62,7 @@ model KosFacility {
   kos_id  Int
   facility String
 
-  kos     Kos    @relation(fields: [kos_id], references: [id])
+  kos     Kos    @relation(fields: [kos_id], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -70,7 +70,7 @@ model Review {
   kos_id   Int
   user_id  Int
   comment  String
-  reply    String?   // balasan owner (nullable)
+  reply    String?
 
   kos      Kos   @relation(fields: [kos_id], references: [id])
   user     User  @relation(fields: [user_id], references: [id])

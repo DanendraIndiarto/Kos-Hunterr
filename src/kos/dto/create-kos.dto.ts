@@ -15,7 +15,4 @@ export class CreateKosDto {
 
   @IsEnum(Gender)
   gender: Gender;
-
-  @IsString()
-  facilities: string; // nanti di controller split menjadi array
 }

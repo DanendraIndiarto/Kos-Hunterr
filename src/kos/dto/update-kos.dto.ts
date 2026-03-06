@@ -19,7 +19,4 @@ export class UpdateKosDto {
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
-
-  @IsOptional()
-  facilities?: string[]; // array of strings
 }

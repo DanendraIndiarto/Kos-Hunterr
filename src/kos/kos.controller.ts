@@ -26,7 +26,11 @@ import { UpdateKosDto } from './dto/update-kos.dto';
 import { multerConfig } from './multer.config';
 
 interface RequestWithUser extends Request {
-  user: { id: number; email: string; role: string };
+  user: {
+    id: number;
+    email: string;
+    role: string;
+  };
 }
 
 @Controller('kos')
@@ -42,8 +46,7 @@ export class KosController {
     @Req() req: RequestWithUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const userId = req.user.id;
-    return this.kosService.create(dto, userId, file);
+    return this.kosService.create(dto, req.user.id, file);
   }
 
   @Get()

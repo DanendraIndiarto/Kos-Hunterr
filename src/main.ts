@@ -5,19 +5,16 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🌍 Enable CORS
   app.enableCors();
 
-  // 📦 Global Validation DTO
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // hapus field yg tidak ada di DTO
+      whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true, // auto convert type
+      transform: true,
     }),
   );
 
-  // 🔥 Optional: Prefix API
   app.setGlobalPrefix('api');
 
   await app.listen(process.env.PORT ?? 3020);

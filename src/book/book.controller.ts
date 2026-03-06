@@ -54,7 +54,6 @@ export class BookController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('OWNER')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateBookStatusDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
     return this.bookService.updateStatus(Number(id), dto.status);
   }
 
