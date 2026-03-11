@@ -61,7 +61,7 @@ export class PdfService {
         ? booking.kos.images[0].file
         : '-';
 
-    doc.image(`KosImage/${image}`, {
+    doc.image(`uploads/${image}`, {
       fit: [250, 200],
       align: 'center',
     });
