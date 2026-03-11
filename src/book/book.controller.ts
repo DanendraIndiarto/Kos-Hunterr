@@ -42,7 +42,7 @@ export class BookController {
     return this.bookService.create({
       ...dto,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      userId: user.id,
+      userId: user.sub ?? user.id,
     });
   }
 
