@@ -80,10 +80,21 @@ export class KosService {
     });
   }
 
-  remove(id: number) {
-    return this.prisma.kos.delete({
-      where: { id },
-    });
+  async remove(id: number) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.prisma.$transaction([
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      this.prisma.images.deleteMany({
+        where: { kos_id: id },
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      this.prisma.facilities.deleteMany({
+        where: { kos_id: id },
+      }),
+      this.prisma.kos.delete({
+        where: { id },
+      }),
+    ]);
   }
 
   findByGender(gender: Gender) {
