@@ -81,23 +81,27 @@ export class KosService {
   }
 
   async remove(id: number) {
-    return this.prisma.$transaction([
-      this.prisma.kosImage.deleteMany({
+    return this.prisma.$transaction(async (prisma) => {
+      await prisma.kosImage.deleteMany({
         where: { kos_id: id },
-      }),
-      this.prisma.kosFacility.deleteMany({
+      });
+
+      await prisma.kosFacility.deleteMany({
         where: { kos_id: id },
-      }),
-      this.prisma.review.deleteMany({
+      });
+
+      await prisma.review.deleteMany({
         where: { kos_id: id },
-      }),
-      this.prisma.book.deleteMany({
+      });
+
+      await prisma.book.deleteMany({
         where: { kos_id: id },
-      }),
-      this.prisma.kos.delete({
+      });
+
+      return prisma.kos.delete({
         where: { id },
-      }),
-    ]);
+      });
+    });
   }
 
   findByGender(gender: Gender) {
