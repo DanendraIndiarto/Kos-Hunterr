@@ -81,14 +81,17 @@ export class KosService {
   }
 
   async remove(id: number) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.$transaction([
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      this.prisma.images.deleteMany({
+      this.prisma.kosImage.deleteMany({
         where: { kos_id: id },
       }),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      this.prisma.facilities.deleteMany({
+      this.prisma.kosFacility.deleteMany({
+        where: { kos_id: id },
+      }),
+      this.prisma.review.deleteMany({
+        where: { kos_id: id },
+      }),
+      this.prisma.book.deleteMany({
         where: { kos_id: id },
       }),
       this.prisma.kos.delete({
