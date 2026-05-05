@@ -15,5 +15,9 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  
+  @Post('login')
+  @ApiOperation({ summary: 'Login user dan mendapatkan JWT token' })
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto.email, dto.password);
+  }
 }
