@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Put, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Param,
+  Body,
+  Delete,
+} from '@nestjs/common';
 import { FacilityService } from './facility.service';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 
@@ -22,5 +30,10 @@ export class FacilityController {
     @Body() dto: CreateFacilityDto,
   ) {
     return this.facilityService.updateFacilities(Number(kosId), dto);
+  }
+
+  @Delete('delete/:kosId')
+  deleteFacilities(@Param('kosId') kosId: string) {
+    return this.facilityService.deleteFacilities(Number(kosId));
   }
 }

@@ -3,13 +3,13 @@ import { IsNotEmpty, IsNumber, IsDateString } from 'class-validator';
 export class CreateBookDto {
   @IsNotEmpty()
   @IsNumber()
-  kosId: number;
+  kosId!: number;
 
   @IsNotEmpty()
   @IsDateString()
-  startDate: string;
+  startDate!: string;
 
   @IsNotEmpty()
   @IsDateString()
-  endDate: string;
+  endDate!: string;
 }

@@ -4,15 +4,15 @@ import { Gender } from '@prisma/client';
 
 export class CreateKosDto {
   @IsString()
-  name: string;
+  name!: string;
 
   @IsString()
-  address: string;
+  address!: string;
 
   @Type(() => Number)
   @IsNumber()
-  price_per_month: number;
+  price_per_month!: number;
 
   @IsEnum(Gender)
-  gender: Gender;
+  gender!: Gender;
 }

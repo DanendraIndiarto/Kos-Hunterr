@@ -39,10 +39,12 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password.trim(), 10);
 
     const user = await this.usersService.create({
-      ...dto,
+      name: dto.name,
       email,
+      phone: dto.phone,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: hashedPassword,
+      role: dto.role ?? 'SOCIETY',
     });
 
     return {

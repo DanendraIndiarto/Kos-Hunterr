@@ -17,8 +17,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Library API')
-    .setDescription('Backend API Sistem Perpustakaan')
+    .setTitle('Kos API')
+    .setDescription('Backend API penyedia layanan kos-kosan')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

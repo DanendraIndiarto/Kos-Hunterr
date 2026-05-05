@@ -42,29 +42,52 @@ export class FacilityService {
   }
 
   async updateFacilities(kosId: number, dto: CreateFacilityDto) {
-    await this.prisma.kosFacility.deleteMany({
-      where: { kos_id: kosId },
-    });
-
-    const facilities = (dto.facility ?? '')
+    const newFacilities = (dto.facility ?? '')
       .split(',')
       .map((f) => f.trim())
       .filter((f) => f);
 
-    await this.prisma.kosFacility.createMany({
-      data: facilities.map((f) => ({
-        kos_id: kosId,
-        facility: f,
-      })),
+    const existing = await this.prisma.kosFacility.findMany({
+      where: { kos_id: kosId },
+    });
+
+    const existingNames = existing.map((f) => f.facility);
+
+    // tambah yang belum ada
+    const toAdd = newFacilities.filter((f) => !existingNames.includes(f));
+
+    // hapus yang tidak ada di input baru
+    const toDelete = existing.filter(
+      (f) => !newFacilities.includes(f.facility),
+    );
+
+    await this.prisma.$transaction(async (prisma) => {
+      if (toDelete.length > 0) {
+        await prisma.kosFacility.deleteMany({
+          where: {
+            id: { in: toDelete.map((f) => f.id) },
+          },
+        });
+      }
+
+      if (toAdd.length > 0) {
+        await prisma.kosFacility.createMany({
+          data: toAdd.map((f) => ({
+            kos_id: kosId,
+            facility: f,
+          })),
+        });
+      }
     });
 
     return this.prisma.kosFacility.findMany({
       where: { kos_id: kosId },
-      select: {
-        id: true,
-        kos_id: true,
-        facility: true,
-      },
+    });
+  }
+
+  async deleteFacilities(kosId: number) {
+    return this.prisma.kosFacility.deleteMany({
+      where: { kos_id: kosId },
     });
   }
 }

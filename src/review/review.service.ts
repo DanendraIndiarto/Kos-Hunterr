@@ -17,7 +17,11 @@ export class ReviewService {
     });
   }
 
-  reply(reviewId: number, dto: ReplyReviewDto) {
+  reply(
+    user: { id: number; email: string; role: string },
+    reviewId: number,
+    dto: ReplyReviewDto,
+  ) {
     return this.prisma.review.update({
       where: { id: reviewId },
       data: {
